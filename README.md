@@ -8,7 +8,7 @@ Experimental workflow            |  Infection with H.polygyrus
 ![](https://github.com/adamh-broad/single_cell_intestine/blob/master/Fig1a.jpg)  |  ![](https://github.com/adamh-broad/single_cell_intestine/blob/master/Relmb.jpg)
 
 ## Single-cell analysis code
-<a href="https://github.com/adamh-broad/single_cell_intestine/blob/master/Analysis.md">Quick start</a> R code for analysis of 7,216 intestinal epithelial cells
+<a href="https://github.com/adamh-broad/single_cell_intestine/blob/master/Analysis.md">Quick start</a> R code for analysis of 7,216 intestinal epithelial cells. It's a good idea to download Fxns.R and atlas_tsne.txt first. There are several R packages needed to run this code, each can be install using the 'install.packages' command. For example, to install the NMF package used to render a heatmap, run the R command 'install.packages(NMF)'.
 
 ## Related Resources
 * <a href="https://www.nature.com/articles/nature24489">Our paper</a>

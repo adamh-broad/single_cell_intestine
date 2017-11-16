@@ -12,7 +12,7 @@ atlas_umis = read.delim("GSE92332_atlas_UMIcounts.txt.gz")
 info(sprintf("Data dimensions: %s" , paste(dim(atlas_umis), collapse = "x")))
 ```
 
-    ## 2017-11-15 20:47:36 INFO: Data dimensions: 15971x7216
+    ## 2017-11-16 15:14:19 INFO: Data dimensions: 15971x7216
 
 ### Get variable genes
 
@@ -20,11 +20,11 @@ info(sprintf("Data dimensions: %s" , paste(dim(atlas_umis), collapse = "x")))
 v = get.variable.genes(atlas_umis, min.cv2 = 100)
 ```
 
-    ## 2017-11-15 20:47:41 INFO: Fitting only the 9723 genes with mean expression > 0.0330515521064302
+    ## 2017-11-16 15:14:23 INFO: Fitting only the 9723 genes with mean expression > 0.0330515521064302
 
 ![](Analysis_figs/Analysis-get_variable_genes-1.png)
 
-    ## 2017-11-15 20:47:42 INFO: Found 3542 variable genes (p<0.05)
+    ## 2017-11-16 15:14:24 INFO: Found 3542 variable genes (p<0.05)
 
 ``` r
 var.genes = as.character(rownames(v)[v$p.adj<0.05])
@@ -46,7 +46,7 @@ table(batch.labels)
 atlas_tpm = data.frame(log2(1+tpm(atlas_umis)))
 ```
 
-    ## 2017-11-15 20:47:42 INFO: Running TPM normalisation
+    ## 2017-11-16 15:14:24 INFO: Running TPM normalisation
 
 ``` r
 ## take mean tpm across batches to show batch effect
@@ -69,6 +69,13 @@ atlas_tpm_norm = batch.normalise.comBat(counts = atlas_tpm, batch.groups = batch
     ## Loading required package: mgcv
 
     ## Loading required package: nlme
+
+    ## 
+    ## Attaching package: 'nlme'
+
+    ## The following object is masked from 'package:NMF':
+    ## 
+    ##     coef<-
 
     ## This is mgcv 1.8-16. For overview type 'help("mgcv-package")'.
 
@@ -94,14 +101,12 @@ smoothScatter(x, y, nrpoints=Inf, pch=16, cex=0.25, main=sprintf("After batch co
 ### Run (randomized) PCA, t-SNE
 
 ``` r
-library(rsvd)
 pca = rpca(t(atlas_tpm_norm[var.genes,]), center=T, scale=T, retx=T, k=100)$x
 
 # or read PCA rotations used in the paper (since the alg is randomized)
 #pca = read.delim(file="atlas_pca_scores.txt")
 
 ### run t-SNE
-library(Rtsne)
 #barnes_hut_tsne = Rtsne(pca[, 1:13], check_duplicates=T,   pca=FALSE, #dont run PCA again
 #                               initial_dims = 13, perplexity = 20, max_iter = 100000, verbose=T, whiten=F)
 #tsne.rot = barnes_hut_tsne$Y
@@ -118,22 +123,55 @@ tsne.rot = read.delim("atlas_tsne.txt")
 
 ### Run kNN-graph clustering
 
+``` r
+# build cell-cell euclidean distance matrix using significant PC scores
+dm = as.matrix(dist(pca[, 1:13]))
+# build nearest neighbor graph
+knn = build_knn_graph(dm, k = 200)
+```
+
+    ## Loading required package: igraph
+
+    ## 
+    ## Attaching package: 'igraph'
+
+    ## The following objects are masked from 'package:NMF':
+    ## 
+    ##     algorithm, compare
+
+    ## The following objects are masked from 'package:BiocGenerics':
+    ## 
+    ##     normalize, union
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     decompose, spectrum
+
+    ## The following object is masked from 'package:base':
+    ## 
+    ##     union
+
+``` r
+clustering = cluster_graph(knn)$partition
+
+# merge a spurious cluster (cluster 16 is only a single cell) into the most similar cluster
+clustering = merge_clusters(clustering, c(8, 16))
+```
+
+    ## Merging cluster 16 into 8 ..
+
+``` r
+## confirm that clusters are extremely similar to those in the paper (infomap is a random-walk based alg, so there are small differences)
+clusters_from_paper = factor(unlist(lapply(colnames(atlas_umis), get_field, 3,"_")))
+aheatmap(as.data.frame.matrix(table(clusters_from_paper, clustering)))
+```
+
+![](Analysis_figs/Analysis-graph_cluster-1.png)
+
 ### Visualize the clustering overlaid onto the t-SNE (Figure 1b)
 
 ``` r
-library(ggplot2)
 x = data.frame(tsne.rot, clustering)
-library(cowplot)
-```
-
-    ## 
-    ## Attaching package: 'cowplot'
-
-    ## The following object is masked from 'package:ggplot2':
-    ## 
-    ##     ggsave
-
-``` r
 ggplot(x, aes(x=tSNE_1, y=tSNE_2, color=clustering)) + geom_point() + scale_color_manual(values=brewer16)
 ```
 

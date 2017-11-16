@@ -1,4 +1,8 @@
 
+Experimental workflow            |  Infection with H.polygyrus
+:-------------------------:|:-------------------------:
+![](https://github.com/adamh-broad/single_cell_intestine/blob/master/Fig1a.jpg)  |  ![](https://github.com/adamh-broad/single_cell_intestine/blob/master/Relmb.jpg)
+
 <img src="https://github.com/adamh-broad/single_cell_intestine/blob/master/Fig1a.jpg" title="Experiment_workflow" alt="Fig1a" height=300 width=300>
 
 # A single-cell survey of the intestinal epithelium

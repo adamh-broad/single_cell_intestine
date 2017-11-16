@@ -12,7 +12,7 @@ atlas_umis = read.delim("GSE92332_atlas_UMIcounts.txt.gz")
 info(sprintf("Data dimensions: %s" , paste(dim(atlas_umis), collapse = "x")))
 ```
 
-    ## 2017-11-15 20:09:11 INFO: Data dimensions: 15971x7216
+    ## 2017-11-15 20:47:36 INFO: Data dimensions: 15971x7216
 
 ### Get variable genes
 
@@ -20,11 +20,11 @@ info(sprintf("Data dimensions: %s" , paste(dim(atlas_umis), collapse = "x")))
 v = get.variable.genes(atlas_umis, min.cv2 = 100)
 ```
 
-    ## 2017-11-15 20:09:15 INFO: Fitting only the 9723 genes with mean expression > 0.0330515521064302
+    ## 2017-11-15 20:47:41 INFO: Fitting only the 9723 genes with mean expression > 0.0330515521064302
 
 ![](Analysis_figs/Analysis-get_variable_genes-1.png)
 
-    ## 2017-11-15 20:09:16 INFO: Found 3542 variable genes (p<0.05)
+    ## 2017-11-15 20:47:42 INFO: Found 3542 variable genes (p<0.05)
 
 ``` r
 var.genes = as.character(rownames(v)[v$p.adj<0.05])
@@ -46,7 +46,7 @@ table(batch.labels)
 atlas_tpm = data.frame(log2(1+tpm(atlas_umis)))
 ```
 
-    ## 2017-11-15 20:09:16 INFO: Running TPM normalisation
+    ## 2017-11-15 20:47:42 INFO: Running TPM normalisation
 
 ``` r
 ## take mean tpm across batches to show batch effect
@@ -117,79 +117,6 @@ tsne.rot = read.delim("atlas_tsne.txt")
      Runtime: 5110 s
 
 ### Run kNN-graph clustering
-
-``` r
-# build cell-cell euclidean distance matrix using significant PC scores
-dm = as.matrix(dist(pca[, 1:13]))
-# build nearest neighbor graph
-knn = build_knn_graph(dm, k = 200)
-```
-
-    ## Loading required package: igraph
-
-    ## 
-    ## Attaching package: 'igraph'
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     decompose, spectrum
-
-    ## The following object is masked from 'package:base':
-    ## 
-    ##     union
-
-``` r
-clustering = cluster_graph(knn)$partition
-library(plyr)
-
-# merge a spurious cluster (cluster 16 is only a single cell) into the most similar cluster
-clustering = merge_clusters(clustering, c(8, 16))
-```
-
-    ## Merging cluster 16 into 8 ..
-
-``` r
-## confirm that clusters are extremely similar to those in the paper (infomap is a random-walk based alg, so there are small differences)
-clusters_from_paper = factor(unlist(lapply(colnames(atlas_umis), get_field, 3,"_")))
-library(NMF)
-```
-
-    ## Loading required package: pkgmaker
-
-    ## Loading required package: registry
-
-    ## Loading required package: rngtools
-
-    ## Loading required package: cluster
-
-    ## Warning: replacing previous import 'colorspace::plot' by 'graphics::plot'
-    ## when loading 'NMF'
-
-    ## Warning: replacing previous import 'dendextend::cutree' by 'stats::cutree'
-    ## when loading 'NMF'
-
-    ## NMF - BioConductor layer [OK] | Shared memory capabilities [NO: bigmemory] | Cores 7/8
-
-    ##   To enable shared memory capabilities, try: install.extras('
-    ## NMF
-    ## ')
-
-    ## 
-    ## Attaching package: 'NMF'
-
-    ## The following objects are masked from 'package:igraph':
-    ## 
-    ##     algorithm, compare
-
-    ## The following object is masked from 'package:nlme':
-    ## 
-    ##     coef<-
-
-``` r
-aheatmap(as.data.frame.matrix(table(clusters_from_paper, clustering)))
-```
-
-![](Analysis_figs/Analysis-graph_cluster-1.png)
 
 ### Visualize the clustering overlaid onto the t-SNE (Figure 1b)
 

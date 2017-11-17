@@ -4,6 +4,10 @@ brewer16 = c(brewer.pal(9, "Set1"), brewer.pal(7, "Set2"))
 brewer16[6] = "khaki2"
 brewer16[8] = "lightskyblue2"
 
+cubehelix1.16 = c('#000000', '#1B0F00', '#411704', '#681B20', 
+    '#85214B', '#932D7E', '#9042AF', '#8160D2', '#6F83E3', 
+    '#63A6E2', '#65C5D3', '#78DBC2', '#99E9B9', '#C1F0BF', '#E6F5D8', '#FFFFFF')
+
 ### Compute the group-wise mean of a dataset.
 group.means <- function(counts, groups, fn=mean, use.data.table=F)
 {
@@ -39,7 +43,6 @@ tpm <- function(counts, mult=10000)
 ### Run ComBat batch correction from the SVA package
 batch.normalise.comBat <- function(counts, batch.groups, max.val=6)
 {
-	library(sva)
     batch.groups = factor(batch.groups) ## drop zero levels
     batch.id = 1:length(unique(batch.groups))
     names(batch.id) = unique(batch.groups)

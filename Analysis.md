@@ -1,6 +1,17 @@
 Analysis of the droplet-based dataset of normal IECs (7,126 cells)
 ================
 
+### Load required R packages
+# can be install using 'install.package'
+```{r load_libraries, eval=FALSE}
+library(NMF)
+library(rsvd)
+library(Rtsne)
+library(ggplot2)
+library(cowplot)
+library(sva)
+```
+
 ### Load UMI count data from GEO
 
 ``` r

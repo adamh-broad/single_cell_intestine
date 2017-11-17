@@ -10,8 +10,11 @@ library(Rtsne)
 library(ggplot2)
 library(cowplot)
 library(sva)
+library(igraph)
+library(cccd)
 ```
 
+## Download data and get variable genes
 ### Load UMI count data from GEO
 
 ``` r
@@ -41,6 +44,7 @@ v = get.variable.genes(atlas_umis, min.cv2 = 100)
 var.genes = as.character(rownames(v)[v$p.adj<0.05])
 ```
 
+## Batch correction (ComBat)
 ### Check whether there is a batch effect
 
 ``` r
@@ -93,6 +97,7 @@ smoothScatter(x, y, nrpoints=Inf, pch=16, cex=0.25, main=sprintf("After batch co
 
 ![](Analysis_figs/Analysis-batch_correct-1.png)
 
+## Dimensionality reduction
 ### Run (randomized) PCA, t-SNE
 
 ``` r
@@ -116,6 +121,7 @@ tsne.rot = read.delim("atlas_tsne.txt")
      13 PCS significant (p<0.05, 1000 bootstraps)
      Runtime: 5110 s
 
+## Unsupervised clustering
 ### Run kNN-graph clustering
 
 ``` r
@@ -125,26 +131,6 @@ dm = as.matrix(dist(pca[, 1:13]))
 knn = build_knn_graph(dm, k = 200)
 ```
 
-    ## Loading required package: igraph
-
-    ## 
-    ## Attaching package: 'igraph'
-
-    ## The following objects are masked from 'package:NMF':
-    ## 
-    ##     algorithm, compare
-
-    ## The following objects are masked from 'package:BiocGenerics':
-    ## 
-    ##     normalize, union
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     decompose, spectrum
-
-    ## The following object is masked from 'package:base':
-    ## 
-    ##     union
 
 ``` r
 clustering = cluster_graph(knn)$partition

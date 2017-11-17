@@ -4,19 +4,11 @@ Analysis of 7,126 WT IECs (droplet-based)
 Load required R packages
 ------------------------
 
-### Can be installed using 'install.package'
+### Can be installed using 'install.packages'
+
 
 ``` r
 library(NMF)
-```
-
-    ## Warning: replacing previous import 'colorspace::plot' by 'graphics::plot'
-    ## when loading 'NMF'
-
-    ## Warning: replacing previous import 'dendextend::cutree' by 'stats::cutree'
-    ## when loading 'NMF'
-
-``` r
 library(rsvd)
 library(Rtsne)
 library(ggplot2)

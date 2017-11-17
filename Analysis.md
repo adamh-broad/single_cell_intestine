@@ -1,10 +1,22 @@
-Analysis of the droplet-based dataset of normal IECs (7,126 cells)
+Analysis of 7,126 WT IECs (droplet-based)
 ================
 
-## Load required R packages
-### can be installed using 'install.package'
-```{r load_libraries, eval=FALSE}
+Load required R packages
+------------------------
+
+### Can be installed using 'install.package'
+
+``` r
 library(NMF)
+```
+
+    ## Warning: replacing previous import 'colorspace::plot' by 'graphics::plot'
+    ## when loading 'NMF'
+
+    ## Warning: replacing previous import 'dendextend::cutree' by 'stats::cutree'
+    ## when loading 'NMF'
+
+``` r
 library(rsvd)
 library(Rtsne)
 library(ggplot2)
@@ -12,13 +24,17 @@ library(cowplot)
 library(sva)
 library(igraph)
 library(cccd)
+
+### Load all the required functions for this analysis
+source("Fxns.R")
 ```
 
-## Download data and get variable genes
+Download data and identify variable genes
+-----------------------------------------
+
 ### Load UMI count data from GEO
 
 ``` r
-source("Fxns.R")
 ## Downloading UMI count data
 download.file("ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE92nnn/GSE92332/suppl/GSE92332_atlas_UMIcounts.txt.gz", destfile="GSE92332_atlas_UMIcounts.txt.gz")
 ## Reading UMI count data from file
@@ -26,7 +42,7 @@ atlas_umis = read.delim("GSE92332_atlas_UMIcounts.txt.gz")
 info(sprintf("Data dimensions: %s" , paste(dim(atlas_umis), collapse = "x")))
 ```
 
-    ## 2017-11-17 11:21:51 INFO: Data dimensions: 15971x7216
+    ## 2017-11-17 11:49:52 INFO: Data dimensions: 15971x7216
 
 ### Get variable genes
 
@@ -34,17 +50,19 @@ info(sprintf("Data dimensions: %s" , paste(dim(atlas_umis), collapse = "x")))
 v = get.variable.genes(atlas_umis, min.cv2 = 100)
 ```
 
-    ## 2017-11-17 11:21:56 INFO: Fitting only the 9723 genes with mean expression > 0.0330515521064302
+    ## 2017-11-17 11:49:57 INFO: Fitting only the 9723 genes with mean expression > 0.0330515521064302
 
 ![](Analysis_figs/Analysis-get_variable_genes-1.png)
 
-    ## 2017-11-17 11:21:57 INFO: Found 3542 variable genes (p<0.05)
+    ## 2017-11-17 11:49:58 INFO: Found 3542 variable genes (p<0.05)
 
 ``` r
 var.genes = as.character(rownames(v)[v$p.adj<0.05])
 ```
 
-## Batch correction (ComBat)
+Batch correction (ComBat)
+-------------------------
+
 ### Check whether there is a batch effect
 
 ``` r
@@ -61,7 +79,7 @@ table(batch.labels)
 atlas_tpm = data.frame(log2(1+tpm(atlas_umis)))
 ```
 
-    ## 2017-11-17 11:21:57 INFO: Running TPM normalisation
+    ## 2017-11-17 11:49:58 INFO: Running TPM normalisation
 
 ``` r
 ## take mean tpm across batches to show batch effect
@@ -80,6 +98,7 @@ smoothScatter(x, y, nrpoints=Inf, pch=16, cex=0.25, main=sprintf("Before batch c
 # Takes a few minutes
 atlas_tpm_norm = batch.normalise.comBat(counts = atlas_tpm, batch.groups = batch.labels)
 ```
+
     ## Found 10 batches
     ## Adjusting for 0 covariate(s) or covariate level(s)
     ## Standardizing Data across genes
@@ -97,7 +116,9 @@ smoothScatter(x, y, nrpoints=Inf, pch=16, cex=0.25, main=sprintf("After batch co
 
 ![](Analysis_figs/Analysis-batch_correct-1.png)
 
-## Dimensionality reduction
+Dimensionality reduction
+------------------------
+
 ### Run (randomized) PCA, t-SNE
 
 ``` r
@@ -121,7 +142,9 @@ tsne.rot = read.delim("atlas_tsne.txt")
      13 PCS significant (p<0.05, 1000 bootstraps)
      Runtime: 5110 s
 
-## Unsupervised clustering
+Unsupervised clustering
+-----------------------
+
 ### Run kNN-graph clustering
 
 ``` r
@@ -129,10 +152,6 @@ tsne.rot = read.delim("atlas_tsne.txt")
 dm = as.matrix(dist(pca[, 1:13]))
 # build nearest neighbor graph
 knn = build_knn_graph(dm, k = 200)
-```
-
-
-``` r
 clustering = cluster_graph(knn)$partition
 
 # merge a spurious cluster (cluster 16 is only a single cell) into the most similar cluster
@@ -142,7 +161,7 @@ clustering = merge_clusters(clustering, c(8, 16))
     ## Merging cluster 16 into 8 ..
 
 ``` r
-## confirm that clusters are extremely similar to those in the paper (infomap is a random-walk based alg, so there are minor differences)
+## confirm that clusters are extremely similar to those in the paper (infomap is a random-walk based alg, so there may begetwd minor differences)
 clusters_from_paper = factor(unlist(lapply(colnames(atlas_umis), get_field, 3,"_")))
 
 overlap = as.data.frame.matrix(table(clusters_from_paper, clustering))

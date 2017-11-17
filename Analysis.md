@@ -65,22 +65,6 @@ smoothScatter(x, y, nrpoints=Inf, pch=16, cex=0.25, main=sprintf("Before batch c
 # Takes a few minutes
 atlas_tpm_norm = batch.normalise.comBat(counts = atlas_tpm, batch.groups = batch.labels)
 ```
-
-    ## Loading required package: mgcv
-
-    ## Loading required package: nlme
-
-    ## 
-    ## Attaching package: 'nlme'
-
-    ## The following object is masked from 'package:NMF':
-    ## 
-    ##     coef<-
-
-    ## This is mgcv 1.8-16. For overview type 'help("mgcv-package")'.
-
-    ## Loading required package: genefilter
-
     ## Found 10 batches
     ## Adjusting for 0 covariate(s) or covariate level(s)
     ## Standardizing Data across genes

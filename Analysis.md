@@ -1,7 +1,7 @@
 Analysis of the droplet-based dataset of normal IECs (7,126 cells)
 ================
 
-# Load required R packages
+## Load required R packages
 ### can be installed using 'install.package'
 ```{r load_libraries, eval=FALSE}
 library(NMF)

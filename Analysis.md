@@ -1,4 +1,4 @@
-Preprocess the primary droplet-based dataset of normal IECs ('Atlas')
+Analysis of the droplet-based dataset of normal IECs (7,126 cells)
 ================
 
 ### Load UMI count data from GEO

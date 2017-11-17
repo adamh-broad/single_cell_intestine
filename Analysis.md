@@ -12,7 +12,7 @@ atlas_umis = read.delim("GSE92332_atlas_UMIcounts.txt.gz")
 info(sprintf("Data dimensions: %s" , paste(dim(atlas_umis), collapse = "x")))
 ```
 
-    ## 2017-11-16 15:14:19 INFO: Data dimensions: 15971x7216
+    ## 2017-11-17 11:21:51 INFO: Data dimensions: 15971x7216
 
 ### Get variable genes
 
@@ -20,11 +20,11 @@ info(sprintf("Data dimensions: %s" , paste(dim(atlas_umis), collapse = "x")))
 v = get.variable.genes(atlas_umis, min.cv2 = 100)
 ```
 
-    ## 2017-11-16 15:14:23 INFO: Fitting only the 9723 genes with mean expression > 0.0330515521064302
+    ## 2017-11-17 11:21:56 INFO: Fitting only the 9723 genes with mean expression > 0.0330515521064302
 
 ![](Analysis_figs/Analysis-get_variable_genes-1.png)
 
-    ## 2017-11-16 15:14:24 INFO: Found 3542 variable genes (p<0.05)
+    ## 2017-11-17 11:21:57 INFO: Found 3542 variable genes (p<0.05)
 
 ``` r
 var.genes = as.character(rownames(v)[v$p.adj<0.05])
@@ -46,7 +46,7 @@ table(batch.labels)
 atlas_tpm = data.frame(log2(1+tpm(atlas_umis)))
 ```
 
-    ## 2017-11-16 15:14:24 INFO: Running TPM normalisation
+    ## 2017-11-17 11:21:57 INFO: Running TPM normalisation
 
 ``` r
 ## take mean tpm across batches to show batch effect
@@ -161,9 +161,13 @@ clustering = merge_clusters(clustering, c(8, 16))
     ## Merging cluster 16 into 8 ..
 
 ``` r
-## confirm that clusters are extremely similar to those in the paper (infomap is a random-walk based alg, so there are small differences)
+## confirm that clusters are extremely similar to those in the paper (infomap is a random-walk based alg, so there are minor differences)
 clusters_from_paper = factor(unlist(lapply(colnames(atlas_umis), get_field, 3,"_")))
-aheatmap(as.data.frame.matrix(table(clusters_from_paper, clustering)))
+
+overlap = as.data.frame.matrix(table(clusters_from_paper, clustering))
+overlap = round(sweep(overlap,2,colSums(overlap),`/`),2)
+overlap = overlap[,apply(overlap, 1, FUN=which.max)]
+aheatmap(overlap, color = cubehelix1.16, border_color = list("cell"="white"), txt=overlap, Colv = NA, Rowv = NA)
 ```
 
 ![](Analysis_figs/Analysis-graph_cluster-1.png)

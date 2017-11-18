@@ -23,4 +23,4 @@ Experimental workflow            |  Infection with H.polygyrus
 * <a href="https://portals.broadinstitute.org/single_cell/study/small-intestinal-epithelium">Single Cell Portal (Broad Institute)</a>
 
 Questions:
-email ahaber <at> broadinstitute.org
+email ahaber -at- broadinstitute.org

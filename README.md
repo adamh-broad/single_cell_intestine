@@ -1,7 +1,7 @@
 # A single-cell survey of the intestinal epithelium
 
 ## Single-cell analysis code
-This repo contains <a href="https://github.com/adamh-broad/single_cell_intestine/blob/master/Analysis.md">quick start</a> R code for analysis of 7,216 intestinal epithelial cells. The easiest way to run it is to clone the repo (download ZIP button at top) and open Analysis.Rmd in RStudio. 
+This repo contains <a href="https://github.com/adamh-broad/single_cell_intestine/blob/master/Analysis.md">quick start</a> R code for analysis of 7,216 intestinal epithelial cells. The easiest way to run it is to clone the repo (download ZIP button at top) and open the file 'Analysis.Rmd' in <a href="https://www.rstudio.com/">RStudio</a>. 
 
 There are several R (3.3 or later is required) packages needed to run the code, each can be installed using the 'install.packages' command. For example, to install the NMF package used to render a heatmap, run the R command 'install.packages("NMF")'. The 'sva' package used for batch correction must be installed from Bioconductor:
 

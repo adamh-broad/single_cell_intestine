@@ -1,5 +1,4 @@
 
-library(RColorBrewer)
 brewer16 = c(brewer.pal(9, "Set1"), brewer.pal(7, "Set2"))
 brewer16[6] = "khaki2"
 brewer16[8] = "lightskyblue2"
@@ -60,7 +59,7 @@ batch.normalise.comBat <- function(counts, batch.groups, max.val=6)
 ### 	and: http://pklab.med.harvard.edu/scw2014/subpop_tutorial.html
 get.variable.genes <- function(ed, min.cv2=2, pdf=NULL, width=9, height=8, do.plot=T, p.thresh=0.05)
 {
-	library(statmod)
+
 	means <- rowMeans(ed)
 	vars <- apply(ed,1,var)
 	cv2 <- vars/means^2
@@ -104,6 +103,7 @@ get.variable.genes <- function(ed, min.cv2=2, pdf=NULL, width=9, height=8, do.pl
 
 
 # Test for significant PCs adapted from: 
+# 
 #	' Permutation Parallel Analysis
 #	'
 #	' Estimate a number of significant principal components from a permutation test
@@ -190,113 +190,8 @@ sig.pcs.perm <- function (dat, B = 100, threshold = 0.05,
     return(list(r = r, p = p))
 }
 
-
-plot_graph <- function(g, 
-	node.names=NULL, 
-	node.clustering=NULL, 
-	node.label.size=2, 
-	use.cols=NULL,
-	layout=NULL,
-	layout.type=NULL,
-	grid=F, 
-	simplify=F, 
-	community=F,
-	node.size=500,
-	max.edges.for.plot=100000,
-	edge.width=1)
-{
-	if(is.null(node.names))
-	{
-		#node.names = c(rep("", vcount(g)))
-		node.names = V(g)$name
-	}
-	V(g)$label.cex = node.label.size
-	
-	if(!is.null(node.clustering))
-	{
-		if(length(node.clustering) != vcount(g))
-		{
-			error("Length of cluster vector must match number of nodes in graph!")
-			return (FALSE)
-		}
-		n.colors = length(unique(node.clustering))
-		if(is.null(use.cols))
-		{
-			use.cols = intense.cols(n.colors)	
-		}
-		if(community) # simplified graph showing community structure only
-		{
-			g <- contract.vertices(g, node.clustering)
-			g <- igraph::simplify(g, remove.loops=TRUE)
-			V(g)$color = use.cols
-		}else
-		{
-			V(g)$color = mapvalues(node.clustering, unique(node.clustering), use.cols)
-		}
-		
-		#E(g)$weight <- 1
-		
-	}else
-	{
-		if(community)
-		{
-			error("Cannot draw a community graph without being passed a graph clustering!")
-			return (FALSE)
-		}
-	}
-
-	if(simplify)
-	{
-		info("Simplifying graph..")
-		g = igraph::simplify(g)
-	}
-
-	if(ecount(g) > max.edges.for.plot)
-	{
-		#TODO: should trim graph to the maximum edge num.
-		warn(sprintf("Graph contains more than %s edges. Trimming some..",max.edges.for.plot))
-		before = ecount(g)
-		g = delete.edges(g, which(E(g)$weight <=.35))
-		after = ecount(g)
-		info(sprintf("Removed %s edges for plotting [%s remain]..", before-after, after))
-	}
-
-	if(is.null(layout))
-	{
-		info(sprintf("Laying out graph [%s nodes]..", vcount(g)))
-		if(is.null(layout.type))
-		{
-			info("Using autolayout. Try: fruchterman.reingold, reingoild.tilford, kamada, or spring for better results")
-			l = layout.auto(g)
-		}else{
-			if(layout.type=="fruchterman.reingold"){l = layout.fruchterman.reingold(g)}
-			else{if(layout.type=="reingold.tilford"){
-					g = simplify(g)
-					l <- layout.reingold.tilford(g, circular=T)}else{
-					if(layout.type=="kamada"){l = layout.kamada.kawai(g)}else{
-						if(layout.type == "spring"){l = layout.spring(g)}else{
-							error("unknown layout type")
-						}
-					}
-				}
-			}
-		}
-	}else{
-		l = layout
-	}
-	
-	info("Plotting..")
-	plot(g, layout=l, vertex.size=node.size, edge.width=edge.width, edge.arrow.size=0,
-			vertex.label=node.names, rescale=FALSE, xlim=range(l[,1]), ylim=range(l[,2]),
-		 	vertex.label.dist=1)
-	return(l)
-}
-
-
-
 build_knn_graph <- function(dm, k=200, verbose=F)
 {
-	library(cccd) 
 	if(k==0)
 	{
 		k = floor(sqrt(nrow(dm))/2)
@@ -329,7 +224,6 @@ cluster_graph <- function(	g,
 	{
 		r = igraph::cluster.markov(g)
 		clusters = r$Cluster
-		
 	}else{
 		if(identical(toupper(community.detect), toupper("louvain")))
 		{
@@ -347,7 +241,6 @@ cluster_graph <- function(	g,
 		}
 	}
 	n.clusters =length(unique(clusters))
-	
 	f = function(i){as.vector(clusters==i)}
 	clist= lapply(1:n.clusters, f)
 	m = igraph::modularity(g, clusters)
@@ -362,21 +255,14 @@ cluster_graph <- function(	g,
 
 merge_clusters <- function(clustering, clusters.to.merge, new.name=NULL)
 {
-	if(length(clustering) < 2)
-	{
-		cat("ERROR: Must provide 2 or more cluster ID's to merge!")
-		return (clusterings)
-	}
-
+	if(length(clustering) < 2){cat("ERROR: Must provide 2 or more cluster ID's to merge!");return (clustering)}
 	i = 1
 	if(!is.null(new.name)){
 		use.id = new.name
 		levels(clustering) = c(levels(clustering), use.id)
 		clustering[which(clustering == clusters.to.merge[1])] = use.id
 	}else
-	{
-		use.id = clusters.to.merge[1]
-	}
+	{use.id = clusters.to.merge[1]}
 	for(id in clusters.to.merge)
 	{
 		if(i > 1)
@@ -385,9 +271,8 @@ merge_clusters <- function(clustering, clusters.to.merge, new.name=NULL)
 			clustering[which(clustering == id)] = use.id
 		}
 		i = i + 1 
-		
 	} 
-	return (factor(clustering))
+	factor(clustering)
 }
 
 
